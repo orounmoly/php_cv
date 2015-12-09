@@ -1,0 +1,8 @@
+{
+  "autoload": {
+    "classmap": [
+      "lib/db/DbOperation.php",
+      "lib/library/Library.php"
+    ]
+  }
+}
