@@ -70,7 +70,7 @@ class DbOperation {
      * @return array
      * @internal param string $table
      */
-    public function getDb($arg=array())
+    public function getDb($arg= [])
     {
         $result = array();
         $db = $this->connect();
@@ -190,7 +190,7 @@ class DbOperation {
 
         try{
             $sql = "select {$arg['field']} from {$arg['table']} {$sql_join} where 1=1 {$conditon}";
-            var_dump($sql);
+
             if($this->DRIVER == "mysqli")
             {
                 $query = $db->query($sql);
@@ -217,6 +217,71 @@ class DbOperation {
             var_dump("Error: {$e->getMessage()}");
             return;
         }
+    }
+
+    /**
+     * @param array $arg
+     */
+    public function insertDb($arg=[])
+    {
+        if(empty($arg)) return;
+
+        $db = $this->connect();
+        $field = "";
+        $value = "";
+
+        try{
+            if($this->DRIVER == 'mysqli')
+            {
+                if (!empty($arg["data"]))
+                {
+                    $data = $arg["data"];
+                    foreach ($data as $k => $v) {
+                        $field .= empty($field) ? "`{$k}`" : ",`{$k}`";
+                        $value .= empty($value) ? "'{$v}'" : ",'{$v}'";
+                    }
+                }
+                $sql = "insert into {$arg['table']}({$field}) values({$value})";
+                return $db->query($sql)? $db->insert_id : 0;
+
+            }elseif($this->DRIVER == 'sqlsrv'){
+                $var = [];
+                if(! empty($arg["data"]))
+                {
+                    $data = $arg["data"];
+                    foreach($data as $k => $v)
+                    {
+                        $field .= empty($field) ? $k : ",{$k}";
+                        $value .= empty($value) ? "?" : ",?";
+                        array_push($var, $v);
+                    }
+                }
+
+                $sql = "insert into {$arg['table']}({$field}) values({$value}); SELECT SCOPE_IDENTITY() as lastId;";
+                $stmt = sqlsrv_query($db, $sql, $var);
+                if(! $stmt) die(print_r(sqlsrv_errors(),true));
+                sqlsrv_next_result($stmt);
+                $result = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_NUMERIC);
+
+                return $result[0];
+            }else return "Database driver not found!";
+        }catch (mysqli_sql_exception $e){
+            die(var_dump($e->getMessage()));
+        }finally{
+            if($this->DRIVER == "mysqli"){
+                mysqli_close($db);
+            }else if($this->DRIVER == "sqlsrv"){
+                sqlsrv_close($db);
+            }
+        }
+
+    }
+
+    private function insert_id($stmt)
+    {
+        sqlsrv_next_result($stmt);
+        sqlsrv_fetch($stmt);
+        return sqlsrv_get_field($stmt,0);
     }
 
 }

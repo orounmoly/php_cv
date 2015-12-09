@@ -14,7 +14,7 @@ class welcome{
     
     public function index()
     {
-        return $this->get_data();
+        return $this->insert_data();
     }
 
     /**
@@ -58,6 +58,25 @@ class welcome{
             "having"  =>  "count(code)>10"
         ];
         return $this->dbo->getDb($config);
+    }
+
+    public function insert_data()
+    {
+        $config = [
+            "table" => "sys_menu",
+            "data"  => [
+                "parent_id" => "4",
+                "link" => "account/account/chat_account",
+                "title" => "Chat Account",
+                "status"=> "1",
+                "icon" => ""
+            ]
+        ];
+        $result = $this->dbo->insertDb($config);
+        if($result > 0)
+        {
+            return $result;
+        }
     }
     
 }

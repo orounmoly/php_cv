@@ -13,7 +13,7 @@
 */
 
 /* connect to MsSQL */
-/**/
+
     $config["db"] = [
         "driver"=>  "SQLSRV",
         "host"  =>  "127.0.0.1",
@@ -23,6 +23,6 @@
         "dbn"   =>  "ci_db"
     ];
 
-/**/
+
 	
 
