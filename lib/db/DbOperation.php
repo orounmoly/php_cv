@@ -276,12 +276,4 @@ class DbOperation {
         }
 
     }
-
-    private function insert_id($stmt)
-    {
-        sqlsrv_next_result($stmt);
-        sqlsrv_fetch($stmt);
-        return sqlsrv_get_field($stmt,0);
-    }
-
 }
